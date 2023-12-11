@@ -6,6 +6,8 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import apology, login_required, lookup, usd
+from db_module import Database
+
 
 # Configure application
 app = Flask(__name__)
@@ -20,8 +22,7 @@ Session(app)
 
 # Configure SQLite database
 db_path = os.path.join(os.path.dirname(__file__), "finance.db")
-conn = sqlite3.connect(db_path, check_same_thread=False)
-db = conn.cursor()
+db = Database(db_path)
 
 
 @app.after_request
@@ -73,7 +74,8 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        rows = db.execute("SELECT * FROM users WHERE username = ?",
+                          request.form.get("username"))
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
