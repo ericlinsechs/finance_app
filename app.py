@@ -1,6 +1,6 @@
 import os
 
-from cs50 import SQL
+import sqlite3
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -18,8 +18,10 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+# Configure SQLite database
+db_path = os.path.join(os.path.dirname(__file__), "finance.db")
+conn = sqlite3.connect(db_path, check_same_thread=False)
+db = conn.cursor()
 
 
 @app.after_request
@@ -117,3 +119,6 @@ def register():
 def sell():
     """Sell shares of stock"""
     return apology("TODO")
+
+if __name__ == "__main__":
+    app.run(debug=True)
