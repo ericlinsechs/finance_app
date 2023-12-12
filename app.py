@@ -41,11 +41,90 @@ def index():
     return apology("TODO", 200)
 
 
+def validate_symbol(symbol):
+    # Ensure symbol was submitted
+    if not symbol:
+        return "must provide symbol", 400
+    if not symbol.isalpha():
+        return "invalid symbol", 400
+
+    return None, None  # No validation errors
+
+
+def validate_shares(shares):
+    try:
+        shares = int(shares)
+        # Ensure shares was submitted
+        if not shares:
+            return "must provide shares", 400
+
+        if shares < 1:
+            return "value must be greater than or equal to 1", 400
+
+        if shares != float(shares):
+            return "value must be a positive integer", 400
+
+    except ValueError:
+        return "invalid shares", 400
+
+    return None, None  # No validation errors
+
+
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+    # User reached route via POST
+    if request.method == "POST":
+        symbol = request.form.get("symbol")
+        shares = request.form.get("shares")
+
+        # Validate symbol
+        error_message, error_code = validate_symbol(symbol)
+        if error_message:
+            return apology(error_message, error_code)
+
+        # Validate shares
+        error_message, error_code = validate_shares(shares)
+        if error_message:
+            return apology(error_message, error_code)
+
+        quote = lookup(symbol)
+
+        if not quote:
+            return apology("invalid symbol", 400)
+
+        # Get the user cash
+        query = "SELECT cash FROM users WHERE id = ?"
+        args = session.get("user_id")
+        rows = db.execute_query(query, args)
+
+        if not rows:
+            return apology("Failed to retrieve user ID", 500)
+
+        cash = rows[0]["cash"]
+
+        shares = int(shares)
+        buy = float(quote["price"]) * shares
+        if buy > cash:
+            return apology("can't afford", 400)
+
+        # Update transaction
+        query = "INSERT INTO transactions (user_id, symbol, price, shares) VALUES (?, ?, ?, ?)"
+        args = (session.get("user_id"), symbol, float(quote["price"]), shares)
+        db.execute_query(query, *args)
+
+        # Update user cash
+        query = "UPDATE users SET cash = ? WHERE id = ?"
+        args = (cash - buy, session.get("user_id"))
+        db.execute_query(query, *args)
+
+        # Redirect user to home page
+        return redirect("/", code=200)
+
+    # User reached route via GET
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/history")
