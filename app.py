@@ -64,7 +64,6 @@ def login():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
         # Ensure username was submitted
         if not request.form.get("username"):
             return apology("must provide username", 403)
@@ -74,11 +73,14 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?",
-                          request.form.get("username"))
+        rows = db.execute_query(
+            "SELECT * FROM users WHERE username = ?", request.form.get("username")
+        )
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if len(rows) != 1 or not check_password_hash(
+            rows[0]["hash"], request.form.get("password")
+        ):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
@@ -113,7 +115,57 @@ def quote():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
-    return apology("TODO")
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
+        # Ensure username was submitted
+        if not username:
+            return apology("must provide username", 403)
+
+        # Ensure password was submitted
+        elif not password:
+            return apology("must provide password", 403)
+
+        # Ensure confirmation was submitted
+        elif not confirmation:
+            return apology("must provide repeat password", 403)
+
+        # Query database for username
+        rows = db.execute_query("SELECT * FROM users WHERE username = ?", username)
+
+        # Ensure username not exists
+        if len(rows) > 0:
+            return apology("username already exists", 403)
+
+        # Ensure password do match
+        if password != confirmation:
+            return apology("password doesn't match", 403)
+
+        # Insert new user into database
+        query = "INSERT INTO users (username, hash) VALUES (?, ?)"
+        args = (username, generate_password_hash(password, method="pbkdf2"))
+        db.execute_query(query, *args)
+
+        # Get the user ID for the newly registered user
+        query = "SELECT id FROM users WHERE username = ?"
+        args = username
+        rows = db.execute_query(query, args)
+
+        if not rows:
+            return apology("Failed to retrieve user ID", 500)
+
+        # Set the user ID in the session
+        session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("register.html")
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -121,6 +173,7 @@ def register():
 def sell():
     """Sell shares of stock"""
     return apology("TODO")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
