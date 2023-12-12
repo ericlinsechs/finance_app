@@ -36,9 +36,9 @@ class TestDatabase(unittest.TestCase):
         self.db.execute_query(query, *args)
 
         # Retrieve the inserted data for verification
-        result = self.db.execute_query(
-            "SELECT * FROM users WHERE username = ?", "test_user"
-        )
+        query = "SELECT * FROM users WHERE username = ?"
+        args = "test_user"
+        result = self.db.execute_query(query, args)
 
         # Check if the data was inserted correctly
         self.assertEqual(len(result), 1)
