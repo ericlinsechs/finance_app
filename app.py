@@ -123,26 +123,26 @@ def register():
 
         # Ensure username was submitted
         if not username:
-            return apology("must provide username", 403)
+            return apology("must provide username", 400)
 
         # Ensure password was submitted
         elif not password:
-            return apology("must provide password", 403)
+            return apology("must provide password", 400)
 
         # Ensure confirmation was submitted
         elif not confirmation:
-            return apology("must provide repeat password", 403)
+            return apology("must provide repeat password", 400)
 
         # Query database for username
         rows = db.execute_query("SELECT * FROM users WHERE username = ?", username)
 
         # Ensure username not exists
         if len(rows) > 0:
-            return apology("username already exists", 403)
+            return apology("username already exists", 400)
 
         # Ensure password do match
         if password != confirmation:
-            return apology("password doesn't match", 403)
+            return apology("password doesn't match", 400)
 
         # Insert new user into database
         query = "INSERT INTO users (username, hash) VALUES (?, ?)"
@@ -161,7 +161,7 @@ def register():
         session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/", code=200)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:

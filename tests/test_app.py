@@ -17,7 +17,7 @@ class TestRegister(unittest.TestCase):
             "/register", data={"password": "password", "confirmation": "password"}
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     @patch("app.db.execute_query")
     def test_register_missing_password(self, mock_execute_query):
@@ -26,7 +26,7 @@ class TestRegister(unittest.TestCase):
             "/register", data={"username": "new_user", "confirmation": "password"}
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
         # Check if the user is not logged in after a failed registration
         with app.test_request_context():
@@ -39,7 +39,7 @@ class TestRegister(unittest.TestCase):
             "/register", data={"username": "new_user", "password": "password"}
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     @patch("app.db.execute_query")
     def test_register_existing_username(self, mock_execute_query):
@@ -58,7 +58,7 @@ class TestRegister(unittest.TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     @patch("app.db.execute_query")
     def test_register_passwords_do_not_match(self, mock_execute_query):
@@ -72,7 +72,7 @@ class TestRegister(unittest.TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     @patch("app.db.execute_query")
     def test_register_successful(self, mock_execute_query):
@@ -94,7 +94,7 @@ class TestRegister(unittest.TestCase):
         )
 
         # Check if the response redirects to the home page
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["Location"], "/")
 
 
