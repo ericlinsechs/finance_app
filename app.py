@@ -390,7 +390,7 @@ def sell():
     else:
         user_id = session.get("user_id")
         # Fetch the symbols of stocks the user currently holds
-        query = "SELECT symbol FROM transactions WHERE user_id = ?"
+        query = "SELECT DISTINCT symbol FROM transactions WHERE user_id = ?"
         rows = db.execute_query(query, user_id)
         symbols = [item["symbol"] for item in rows]
 
