@@ -74,13 +74,19 @@ def index():
     holding = {}
     current_price = {}
 
+    # Collect unique symbols
+    unique_symbols = set(row["symbol"] for row in rows)
+
+    # Retrieve current prices for unique symbols
+    for symbol in unique_symbols:
+        current_price[symbol] = "{:.2f}".format(lookup(symbol)["price"])
+
     for row in rows:
         symbol = row["symbol"]
         total_price = round(float(row["price"] * row["shares"]), 2)
 
         shares.setdefault(symbol, 0)
         holding.setdefault(symbol, 0)
-        current_price.setdefault(symbol, "{:.2f}".format(lookup(symbol)["price"]))
 
         shares[symbol] += row["shares"]
         holding[symbol] += total_price
