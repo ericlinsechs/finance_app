@@ -150,6 +150,7 @@ def buy():
         if error_message:
             return apology(error_message, error_code)
 
+        symbol = symbol.upper()
         quote = lookup(symbol)
 
         if not quote:
