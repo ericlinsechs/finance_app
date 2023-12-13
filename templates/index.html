@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Buy
+{% endblock %}
+
+{% block main %}
+<h2>
+    Hold shares
+</h2>
+
+<main class="container py-5 text-center">
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-start">Symbol</th>
+                <th class="text-start">Name</th>
+                <th class="text-end">Shares</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for symbol in shares %}
+            <tr>
+                <td class="text-start">{{ symbol }}</td>
+                <td class="text-start">{{ symbol }}</td>
+                <td class="text-end">{{ shares[symbol] }}</td>
+                <td class="text-end">${{ current_price[symbol] }}</td>
+                <td class="text-end">${{ holding[symbol] }}</td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+        <tfoot>
+            <tr>
+                <td class="border-0 fw-bold text-end" colspan="4">Cash</td>
+                <td class="border-0 text-end">${{ cash }}</td>
+            </tr>
+            <tr>
+                <td class="border-0 fw-bold text-end" colspan="4">TOTAL</td>
+                <td class="border-0 w-bold text-end">${{ total }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+</main>
+{% endblock %}

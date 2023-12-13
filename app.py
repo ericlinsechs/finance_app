@@ -1,7 +1,13 @@
 import os
 
 import sqlite3
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import (
+    Flask,
+    redirect,
+    render_template,
+    request,
+    session,
+)
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -38,7 +44,56 @@ def after_request(response):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO", 200)
+    user_id = session.get("user_id")
+
+    # Get user's cash
+    query = "SELECT cash FROM users WHERE id = ?"
+    rows = db.execute_query(query, user_id)
+
+    if not rows:
+        return apology("Failed to retrieve user ID", 500)
+
+    cash = round(rows[0]["cash"], 2)
+
+    # Calculate total asset
+    total = cash
+
+    # Get the user's transaction records
+    query = "SELECT symbol, price, shares FROM transactions WHERE user_id = ?"
+    rows = db.execute_query(query, user_id)
+
+    if not rows:
+        return render_template(
+            "index.html",
+            cash="{:.2f}".format(cash),
+            total="{:.2f}".format(total),
+        )
+
+    # Calculate shares, holding, and current price
+    shares = {}
+    holding = {}
+    current_price = {}
+
+    for row in rows:
+        symbol = row["symbol"]
+        total_price = round(float(row["price"] * row["shares"]), 2)
+
+        shares.setdefault(symbol, 0)
+        holding.setdefault(symbol, 0)
+        current_price.setdefault(symbol, "{:.2f}".format(lookup(symbol)["price"]))
+
+        shares[symbol] += row["shares"]
+        holding[symbol] += total_price
+        total += total_price
+
+    return render_template(
+        "index.html",
+        shares=shares,
+        current_price=current_price,
+        holding={symbol: "{:.2f}".format(value) for symbol, value in holding.items()},
+        cash="{:.2f}".format(cash),
+        total="{:.2f}".format(total),
+    )
 
 
 def validate_symbol(symbol):
