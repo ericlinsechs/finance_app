@@ -94,7 +94,7 @@ class TestRegister(unittest.TestCase):
         )
 
         # Check if the response redirects to the home page
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(response.headers["Location"], "/")
 
 
