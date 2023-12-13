@@ -44,6 +44,7 @@ class Database:
                 symbol TEXT NOT NULL,
                 price NUMERIC NOT NULL,
                 shares NUMERIC NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY(user_id) REFERENCES users(id)
             );
         """

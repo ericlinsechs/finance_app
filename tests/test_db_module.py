@@ -42,7 +42,7 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(result_transactions)
         self.assertEqual(len(columns_users), 4)  # id, username, hash, cash
         self.assertEqual(
-            len(columns_transactions), 5
+            len(columns_transactions), 6
         )  # id, user_id, symbol, price, shares
 
     def test_execute_query(self):
