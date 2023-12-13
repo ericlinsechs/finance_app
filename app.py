@@ -331,7 +331,70 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+    # User reached route via POST
+    if request.method == "POST":
+        symbol = request.form.get("symbol")
+        shares_sell = request.form.get("shares")
+
+        # Validate symbol
+        error_message, error_code = validate_symbol(symbol)
+        if error_message:
+            return apology(error_message, error_code)
+
+        # Validate shares
+        error_message, error_code = validate_shares(shares_sell)
+        if error_message:
+            return apology(error_message, error_code)
+
+        symbol = symbol.upper()
+        # Look up for the symbol
+        quote = lookup(symbol)
+
+        if not quote:
+            return apology("invalid symbol", 400)
+
+        # Check if the user owns enough shares of stock
+        user_id = session.get("user_id")
+        query = "SELECT shares FROM transactions WHERE user_id = ? AND symbol = ?"
+        args = (user_id, symbol)
+        rows = db.execute_query(query, *args)
+
+        shares_hold = 0
+        shares_sell = int(shares_sell)
+        for row in rows:
+            shares_hold += row["shares"]
+
+        if shares_hold < shares_sell:
+            return apology("too many shares", 400)
+
+        # Get selling price
+        price_sell = round(float(quote["price"] * shares_sell), 2)
+
+        # Update user's cash by adding the selling price
+        query = "UPDATE users SET cash = cash + ? WHERE id = ?"
+        args = (
+            price_sell,
+            user_id,
+        )
+        db.execute_query(query, *args)
+
+        # Update transaction record
+        query = "INSERT INTO transactions (user_id, symbol, price, shares) VALUES (?, ?, ?, ?)"
+        args = (user_id, symbol, quote["price"], -shares_sell)
+        db.execute_query(query, *args)
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET
+    else:
+        user_id = session.get("user_id")
+        # Fetch the symbols of stocks the user currently holds
+        query = "SELECT symbol FROM transactions WHERE user_id = ?"
+        rows = db.execute_query(query, user_id)
+        symbols = [item["symbol"] for item in rows]
+
+        return render_template("sell.html", symbols=symbols)
 
 
 if __name__ == "__main__":
