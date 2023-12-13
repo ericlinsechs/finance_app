@@ -175,7 +175,7 @@ def buy():
         db.execute_query(query, *args)
 
         # Redirect user to home page
-        return redirect("/", code=200)
+        return redirect("/")
 
     # User reached route via GET
     else:
