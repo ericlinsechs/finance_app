@@ -1,6 +1,5 @@
 import os
 
-import sqlite3
 from flask import (
     Flask,
     redirect,
@@ -8,7 +7,6 @@ from flask import (
     request,
     session,
 )
-from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import apology, login_required, lookup, usd
@@ -21,10 +19,7 @@ app = Flask(__name__)
 # Custom filter
 app.jinja_env.filters["usd"] = usd
 
-# Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
+app.config["SECRET_KEY"] = "default_secret_key"
 
 # Configure SQLite database
 db_path = os.path.join(os.path.dirname(__file__), "finance.db")
